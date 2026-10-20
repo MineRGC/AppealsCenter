@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" type="image/png" href="https://i.imgur.com/hVF95aZ.png">
+  <link rel="shortcut icon" href="https://i.imgur.com/hVF95aZ.png">
+  <link rel="apple-touch-icon" href="https://i.imgur.com/hVF95aZ.png">
+  <meta name="theme-color" content="#0b1017">
+  <title>RGC APPEALS CENTER</title>
+  <style>
+    :root {
+      --bg-main: #0b1017;
+      --bg-card: rgba(20, 27, 38, .92);
+      --gold: #d4af37;
+      --gold-light: #f0d477;
+      --purple: #9d65d9;
+      --purple-light: #c89cff;
+      --text-main: #eeeeee;
+      --text-secondary: #9ca8b8;
+      --border: rgba(212,175,55,.24);
+    }
+
+    /* RGC branded loading screen */
+    #rgc-loader {
+      position: fixed; inset: 0; z-index: 99999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; padding: 24px; text-align: center;
+      background: radial-gradient(circle at 50% 42%, rgba(157,101,217,.18), transparent 36%),
+                  linear-gradient(180deg, #0b1017 0%, #05080d 100%);
+      opacity: 1; visibility: visible;
+      transition: opacity .55s ease, visibility .55s ease;
+    }
+    #rgc-loader.loader-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader-logo-wrap {
+      width: 104px; height: 104px; display: grid; place-items: center;
+      border: 1px solid rgba(212,175,55,.65); border-radius: 24px;
+      background: rgba(20,27,38,.82);
+      box-shadow: 0 0 22px rgba(212,175,55,.17), 0 0 42px rgba(157,101,217,.16);
+      animation: loader-pulse 1.8s ease-in-out infinite;
+    }
+    .loader-logo { width: 82px; height: 82px; object-fit: contain; }
+    .loader-title { color: var(--gold-light); font-size: 22px; font-weight: 850; letter-spacing: 1.5px; }
+    .loader-subtitle { margin-top: -9px; color: var(--text-secondary); font-size: 12px; letter-spacing: 1.2px; }
+    .loader-spinner {
+      width: 34px; height: 34px; margin-top: 3px; border-radius: 50%;
+      border: 3px solid rgba(212,175,55,.18); border-top-color: var(--gold-light);
+      border-right-color: var(--purple-light); animation: loader-spin .8s linear infinite;
+    }
+    .loader-status { color: var(--gold-light); font-size: 10px; font-weight: 800; letter-spacing: 2.4px; }
+    @keyframes loader-spin { to { transform: rotate(360deg); } }
+    @keyframes loader-pulse { 0%,100% { transform: scale(1); box-shadow: 0 0 22px rgba(212,175,55,.17), 0 0 42px rgba(157,101,217,.16); } 50% { transform: scale(1.045); box-shadow: 0 0 30px rgba(212,175,55,.28), 0 0 54px rgba(157,101,217,.22); } }
+    @media (prefers-reduced-motion: reduce) { .loader-logo-wrap, .loader-spinner { animation-duration: 2.5s; } }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text-main);
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(157,101,217,.16), transparent 40%),
+        linear-gradient(180deg, #0b1017 0%, #080c12 100%);
+      min-height: 100vh;
+    }
+    .page {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding: 38px 22px 55px;
+    }
+    .header { text-align: center; margin-bottom: 34px; }
+    .title-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 13px; flex-wrap: wrap;
+    }
+    .logo {
+      width: 42px; height: 42px; object-fit: contain; border-radius: 8px;
+    }
+    h1 {
+      margin: 0; font-size: clamp(28px, 4vw, 39px); font-weight: 800;
+      color: var(--gold-light);
+      text-shadow: 0 0 10px rgba(212,175,55,.25), 0 0 30px rgba(157,101,217,.15);
+    }
+    .header p { margin: 11px 0 0; color: var(--text-secondary); font-size: 15px; line-height: 1.6; }
+    .header .subtitle { color: var(--purple-light); margin-top: 4px; }
+    .intro {
+      max-width: 780px; margin: 0 auto 32px; padding: 15px 18px;
+      text-align: center; line-height: 1.65; color: #c1cad6;
+      background: rgba(17,25,35,.72); border: 1px solid rgba(157,101,217,.22);
+      border-radius: 12px;
+    }
+    .intro-es {
+      display: block; margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid rgba(212,175,55,.16); color: var(--gold-light);
+      font-size: .96em;
+    }
+    .region {
+      margin: 0 0 24px; padding: 22px;
+      border: 1px solid var(--border); border-radius: 15px;
+      background: linear-gradient(145deg, rgba(25,33,46,.95), rgba(13,19,28,.96));
+      box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    }
+    .region-heading {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 15px; margin-bottom: 17px;
+      border-bottom: 1px solid rgba(212,175,55,.18);
+    }
+    .region-icon {
+      width: 43px; height: 43px; flex: 0 0 43px;
+      display: grid; place-items: center; border-radius: 11px;
+      background: rgba(157,101,217,.12); border: 1px solid rgba(157,101,217,.3);
+      overflow: hidden;
+      box-shadow: 0 0 14px rgba(212,175,55,.08);
+    }
+    .region-icon img {
+      display: block; width: 100%; height: 100%; object-fit: contain;
+      padding: 4px;
+    }
+    .region-heading h2 { margin: 0; font-size: 22px; color: var(--gold-light); }
+    .region-heading p { margin: 5px 0 0; font-size: 12px; color: var(--text-secondary); }
+    .request-groups {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
+    }
+    .request-group {
+      min-width: 0; padding: 16px; border-radius: 11px;
+      background: rgba(6,11,18,.48); border: 1px solid rgba(255,255,255,.055);
+    }
+    .request-group h3 {
+      margin: 0 0 12px; font-size: 13px; letter-spacing: .8px;
+      text-transform: uppercase; color: var(--purple-light);
+    }
+    .button-list { display: grid; gap: 9px; }
+    .request-btn {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      width: 100%; min-height: 46px; padding: 12px 14px;
+      color: #f5f5f5; text-decoration: none; font-size: 14px; font-weight: 700;
+      border-radius: 8px; border: 1px solid rgba(212,175,55,.3);
+      background: linear-gradient(120deg, rgba(212,175,55,.09), rgba(157,101,217,.09));
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .request-btn::after { content: "↗"; color: var(--gold-light); font-size: 17px; flex: 0 0 auto; }
+    .request-btn:hover {
+      transform: translateY(-2px); border-color: var(--gold);
+      background: linear-gradient(120deg, rgba(212,175,55,.16), rgba(157,101,217,.14));
+      box-shadow: 0 6px 20px rgba(0,0,0,.25), 0 0 16px rgba(212,175,55,.08);
+    }
+    .footer-note {
+      margin-top: 30px; padding: 20px; text-align: center; line-height: 1.6;
+      border-radius: 13px; border: 1px solid rgba(212,175,55,.2);
+      background: linear-gradient(135deg, rgba(212,175,55,.07), rgba(157,101,217,.07));
+      color: var(--text-secondary); font-size: 13px;
+    }
+    .footer-note strong { color: var(--gold-light); }
+    @media (max-width: 680px) {
+      .page { padding: 25px 12px 35px; }
+      .region { padding: 16px 13px; }
+      .request-groups { grid-template-columns: 1fr; }
+      .region-heading h2 { font-size: 19px; }
+      .intro { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="rgc-loader" role="status" aria-live="polite" aria-label="Loading RGC APPEALS CENTER">
+    <div class="loader-logo-wrap"><img class="loader-logo" src="https://i.imgur.com/hVF95aZ.png" alt="RGC Logo"></div>
+    <div class="loader-title">RGC APPEALS CENTER</div>
+    <div class="loader-subtitle">Appeals Center</div>
+    <div class="loader-spinner" aria-hidden="true"></div>
+    <div class="loader-status">LOADING · CARGANDO</div>
+  </div>
+  <main class="page">
+    <header class="header">
+      <div class="title-row">
+        <img class="logo" src="https://i.imgur.com/hVF95aZ.png" alt="RGC logo">
+        <h1>RGC APPEALS CENTER</h1>
+      </div>
+      <p>Choose your region and open the correct ban or unban request form.</p>
+      <p class="subtitle">Ranked Gaming Client — Appeals Center</p>
+    </header>
+
+    <div class="intro">
+      <div lang="en">Select the region you play in, then click the button that matches your request.<br>
+      Each button opens its corresponding form in a new tab.</div>
+      <div class="intro-es" lang="es">Selecciona la región en la que juegas y haz clic en el botón que corresponda a tu solicitud.<br>
+      Cada botón abrirá el formulario correspondiente en una nueva pestaña.</div>
+    </div>
+
+    <section class="region" aria-labelledby="europe-title">
+      <div class="region-heading">
+        <div class="region-icon"><img src="https://i.imgur.com/hVF95aZ.png" alt="RGC logo"></div>
+        <div>
+          <h2 id="europe-title">Europe Region</h2>
+          <p>European server requests</p>
+        </div>
+      </div>
+      <div class="request-groups">
+        <div class="request-group">
+          <h3>Ban Request</h3>
+          <div class="button-list">
+            <a class="request-btn" href="https://forms.gle/u5NAAhwF72h79YUJ9" target="_blank" rel="noopener noreferrer">EU Ban Request</a>
+          </div>
+        </div>
+        <div class="request-group">
+          <h3>Unban Request</h3>
+          <div class="button-list">
+            <a class="request-btn" href="https://forms.gle/LNSdcfZGpuDxM8ks6" target="_blank" rel="noopener noreferrer">EU Unban Request</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="region" aria-labelledby="asia-title">
+      <div class="region-heading">
+        <div class="region-icon"><img src="https://i.imgur.com/hVF95aZ.png" alt="RGC logo"></div>
+        <div>
+          <h2 id="asia-title">Asia Region</h2>
+          <p>Asia, Lod Asia and Thailand requests</p>
+        </div>
+      </div>
+      <div class="request-groups">
+        <div class="request-group">
+          <h3>Ban Request</h3>
+          <div class="button-list">
+            <a class="request-btn" href="https://forms.gle/8NbKhTHfdMYreTCV8" target="_blank" rel="noopener noreferrer">Asia Ban Request</a>
+            <a class="request-btn" href="https://forms.gle/J3TqXyoXo4s6NgiL8" target="_blank" rel="noopener noreferrer">Lod Asia Ban Request</a>
+            <a class="request-btn" href="https://forms.gle/1xxUiJ2t6UJqx7A16" target="_blank" rel="noopener noreferrer">Thailand Ban Request</a>
+          </div>
+        </div>
+        <div class="request-group">
+          <h3>Unban Request</h3>
+          <div class="button-list">
+            <a class="request-btn" href="https://forms.gle/43PXfrAHxVx2ZWoE8" target="_blank" rel="noopener noreferrer">Asia Unban Request</a>
+            <a class="request-btn" href="https://forms.gle/ASbaPGpS9HxNnCND7" target="_blank" rel="noopener noreferrer">Lod Asia Unban Request</a>
+            <a class="request-btn" href="https://forms.gle/yEWCzTF9KZgyWKjv6" target="_blank" rel="noopener noreferrer">Thailand Unban Request</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="region" aria-labelledby="sa-title">
+      <div class="region-heading">
+        <div class="region-icon"><img src="https://i.imgur.com/hVF95aZ.png" alt="RGC logo"></div>
+        <div>
+          <h2 id="sa-title">South America Region</h2>
+          <p>Bolivia, Peru and Lod SA requests</p>
+        </div>
+      </div>
+      <div class="request-groups">
+        <div class="request-group">
+          <h3>Ban Request</h3>
+          <div class="button-list">
+            <a class="request-btn" href="https://forms.gle/UfYzLoJbZV8wSpRo6" target="_blank" rel="noopener noreferrer">Bolivia Ban Request</a>
+            <a class="request-btn" href="https://forms.gle/QDcEMLeRi3hbeqo46" target="_blank" rel="noopener noreferrer">Peru Ban Request</a>
+            <a class="request-btn" href="https://forms.gle/mh6U4FpTCzDaBJW3A" target="_blank" rel="noopener noreferrer">Lod SA Ban Request</a>
+          </div>
+        </div>
+        <div class="request-group">
+          <h3>Unban Request</h3>
+          <div class="button-list">
+            <a class="request-btn" href="https://forms.gle/Sb6EponVE1DnsA7Q7" target="_blank" rel="noopener noreferrer">Bolivia Unban Request</a>
+            <a class="request-btn" href="https://forms.gle/yxnAk8NBPK7vGNEd6" target="_blank" rel="noopener noreferrer">Peru Unban Request</a>
+            <a class="request-btn" href="https://forms.gle/S91nvP21sNhor55j9" target="_blank" rel="noopener noreferrer">Lod SA Unban Request</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      <strong>Before submitting:</strong> please make sure you choose the correct region and request type.
+      If you are unsure which form to use, contact the RGC support team first.
+    </div>
+  </main>
+  <script>
+    (function () {
+      const loader = document.getElementById('rgc-loader');
+      if (!loader) return;
+      const startedAt = Date.now();
+      const minimumDisplayMs = 1000; // Keep the loader visible for about 3.5 seconds.
+      let hidden = false;
+      function hideLoader() {
+        if (hidden) return;
+        hidden = true;
+        loader.classList.add('loader-hidden');
+        window.setTimeout(() => loader.remove(), 650);
+      }
+      function hideAfterMinimumTime() {
+        const elapsed = Date.now() - startedAt;
+        window.setTimeout(hideLoader, Math.max(0, minimumDisplayMs - elapsed));
+      }
+      window.addEventListener('load', hideAfterMinimumTime, { once: true });
+      // Fallback: avoid leaving the loader visible if an external resource stalls.
+      window.setTimeout(hideLoader, 1000);
+    })();
+  </script>
+</body>
+</html>
