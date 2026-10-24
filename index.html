@@ -117,6 +117,17 @@ body.rgc-appeals-current .sidebar nav .nav-item[data-rgc-appeals-nav="true"]::af
   display: block !important;
 }
 </style>
+<style id="rgc-page-restore-preload-style">
+html.rgc-restore-pending #root { visibility: hidden !important; }
+</style>
+<script id="rgc-page-restore-preload">
+(function () {
+  try {
+    var saved = localStorage.getItem('rgc-appeals-center:last-page');
+    if (saved && saved !== 'Home') document.documentElement.classList.add('rgc-restore-pending');
+  } catch (_) {}
+})();
+</script>
 </head><body><div id="root"></div><script>window.RGC_CONFIG = { apiUrl: "https://rgc-public-records.deadfeelings6.workers.dev/api/bans" };</script><script id="rgc-appeals-dashboard-script">
 (function(){
  const forms=[
@@ -149,4 +160,76 @@ body.rgc-appeals-current .sidebar nav .nav-item[data-rgc-appeals-nav="true"]::af
  let tries=0;const timer=setInterval(()=>{tries++;if(setup()||tries>80)clearInterval(timer)},100);new MutationObserver(()=>setup()).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
+
+<script id="rgc-page-restore">
+(function () {
+  'use strict';
+  const KEY = 'rgc-appeals-center:last-page';
+  const PENDING = 'rgc-restore-pending';
+  const clean = value => (value || '').replace(/\s+/g, ' ').trim();
+
+  function reveal() {
+    document.documentElement.classList.remove(PENDING);
+  }
+
+  function getNavItems() {
+    const nav = document.querySelector('.sidebar nav') ||
+      document.querySelector('nav') ||
+      document.querySelector('[class*="sidebar"]');
+    return nav ? Array.from(nav.querySelectorAll('.nav-item')) : [];
+  }
+
+  function itemName(item) {
+    return clean(item && item.textContent);
+  }
+
+  // Save the last selected navigation page, including the dynamically-added Appeals Center.
+  document.addEventListener('click', function (event) {
+    const item = event.target && event.target.closest
+      ? event.target.closest('.nav-item') : null;
+    if (!item) return;
+    const name = item.dataset.rgcAppealsNav === 'true'
+      ? 'Appeals Center' : itemName(item);
+    if (!name) return;
+    try { localStorage.setItem(KEY, name); } catch (_) {}
+  }, true);
+
+  function restoreSavedPage() {
+    let saved = '';
+    try { saved = localStorage.getItem(KEY) || ''; } catch (_) {}
+    if (!saved || saved === 'Home') {
+      reveal();
+      return true;
+    }
+
+    const items = getNavItems();
+    if (!items.length) return false;
+
+    const target = saved === 'Appeals Center'
+      ? items.find(item => item.dataset.rgcAppealsNav === 'true')
+      : items.find(item => itemName(item) === saved);
+    if (!target) return false;
+
+    // The page remains hidden while the navigation state changes, so Home is never flashed.
+    if (!target.classList.contains('active') &&
+        !(saved === 'Appeals Center' && target.classList.contains('appeals-nav-active'))) {
+      target.click();
+    }
+    setTimeout(reveal, 60);
+    return true;
+  }
+
+  let attempts = 0;
+  const timer = setInterval(function () {
+    attempts += 1;
+    if (restoreSavedPage()) {
+      clearInterval(timer);
+    } else if (attempts >= 100) {
+      clearInterval(timer);
+      reveal();
+    }
+  }, 50);
+})();
+</script>
+
 </body></html>
