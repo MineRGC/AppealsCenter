@@ -422,7 +422,9 @@ function rgcValidateUnbanPayload(payload) {
         !Number.isInteger(appeal.row) || appeal.row < 1 ||
         !(appeal.submittedAt === null || typeof appeal.submittedAt === 'string') ||
         (appeal.status === 'Pending' && appeal.adminComment !== '') ||
-        (appeal.status !== 'Granted' && appeal.unbannedBy !== '')) {
+        (appeal.status !== 'Granted' && appeal.unbannedBy !== '') ||
+        (appeal.deniedBy !== undefined && typeof appeal.deniedBy !== 'string') ||
+        (appeal.status !== 'Denied' && (appeal.deniedBy ?? '') !== '')) {
       throw Error('Invalid Unban Appeal received from the data service.');
     }
     ids.add(appeal.id);
@@ -478,7 +480,8 @@ function RgcUnbanAppealsView({appeals = null, sources = [], loading = false, err
       h('td', null, appeal.evidence.trim() ? rgcReportLink(appeal.evidence, 'Evidence') : null),
       h('td', null, h('span', {className: 'rgc-reports__status rgc-reports__status--' + appeal.status.toLowerCase()}, appeal.status)),
       ...(status !== 'Pending' ? [h('td', {className: 'rgc-unban__comment-cell'}, rgcAdminComment(appeal, true))] : []),
-      ...(status === 'Granted' ? [h('td', null, h('span', {className: 'rgc-unban__plain'}, appeal.unbannedBy))] : []),
+      ...(status !== 'Pending' ? [h('td', null, h('span', {className: 'rgc-unban__plain'},
+        status === 'Granted' ? appeal.unbannedBy : appeal.deniedBy || ''))] : []),
       h('td', null, h('span', {className: 'rgc-reports__submitted'}, appeal.submittedAt || '')));
   }
   function renderRoom(source) {
@@ -487,7 +490,7 @@ function RgcUnbanAppealsView({appeals = null, sources = [], loading = false, err
     const unavailable = !hasData || source.connected === false;
     const columns = ['Player', 'Declared room', 'Appeal reason', 'Evidence / Replay', 'Status',
       ...(status !== 'Pending' ? ['Admin comment'] : []),
-      ...(status === 'Granted' ? ['Unbanned by'] : []), 'Submitted'];
+      ...(status !== 'Pending' ? [status === 'Granted' ? 'Unbanned by' : 'Denied by'] : []), 'Submitted'];
     const changePage = next => setPages(previous => ({...previous, [source.id]: next}));
     return h('article', {key: source.id, className: 'rgc-reports__room', 'data-unban-room': source.id},
       h('header', {className: 'rgc-reports__room-header'},
