@@ -145,6 +145,8 @@ function rgcReportsFromPayload(payload) {
         typeof report.reporter !== 'string' || !report.reporter.trim() ||
         typeof report.player !== 'string' || !report.player.trim() ||
         (report.adminComment !== undefined && typeof report.adminComment !== 'string') ||
+        (report.deniedBy !== undefined && typeof report.deniedBy !== 'string') ||
+        (report.status !== 'Denied' && (report.deniedBy ?? '') !== '') ||
         typeof report.category !== 'string' || !['Pending', 'Denied'].includes(report.status) ||
         !['europe', 'asia', 'sa'].includes(report.region) || !sources.has(report.sourceId) ||
         typeof report.sourceName !== 'string' || !Number.isInteger(report.row) || report.row < 1 ||
@@ -272,7 +274,8 @@ function rgcReportRow(report) {
       h('div', { className: 'rgc-reports__room-note' }, rgcReportText(report.timestampsLabel) || 'Timestamps'),
       h('span', { className: 'rgc-reports__time' }, rgcReportText(report.timestamps) || 'Not provided')),
     h('td', null, h('span', { className: 'rgc-reports__status rgc-reports__status--' + report.status.toLowerCase() }, report.status)),
-    ...(report.status === 'Denied' ? [h('td', null, rgcAdminComment(report, true))] : []),
+    ...(report.status === 'Denied' ? [h('td', null, rgcAdminComment(report, true)),
+      h('td', null, h('span', { className: 'rgc-reports__plain-value' }, rgcReportText(report.deniedBy)))] : []),
     h('td', null, h('span', { className: 'rgc-reports__submitted' }, rgcReportText(report.submittedAt) || 'Not recorded')));
 }
 
@@ -322,7 +325,7 @@ function RgcReportsView({ reports = null, sources = [], loading = false, error =
     matches.length ? h('div', { className: 'rgc-reports__table-scroll' },
       h('table', { className: 'rgc-reports__table' + (status === 'Denied' ? ' rgc-reports__table--decided' : ''), 'aria-label': name + ' ' + status.toLowerCase() + ' reports' },
         h('thead', null, h('tr', null, ...['Reporter', 'Reported player', 'Category', 'Evidence / replay',
-          'Explanation / timestamps', 'Status', ...(status === 'Denied' ? ['Admin comment'] : []), 'Submitted'].map(label => h('th', { key: label, scope: 'col' }, label)))),
+          'Explanation / timestamps', 'Status', ...(status === 'Denied' ? ['Admin comment', 'Denied by'] : []), 'Submitted'].map(label => h('th', { key: label, scope: 'col' }, label)))),
         h('tbody', null, ...page.items.map(rgcReportRow))))
       : h('div', { className: 'rgc-reports__empty' },
         h('p', { className: 'rgc-reports__empty-title' }, hasData && source.reportsConfigured !== false && source.connected !== false ? 'No reports to show' : 'Reports unavailable'),
@@ -1651,7 +1654,8 @@ html.rgc-restore-pending #root { visibility: hidden !important; }
    root.querySelector('[data-rec-note]').textContent=t.note;
    fields.innerHTML=t.fields.map(x=>'<li>'+esc(x)+'</li>').join('');
    document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-   root.querySelector('[data-rec-submit]').dataset.mailto='mailto:bikesh@rankedgaming.com?subject='+encodeURIComponent(lang==='en'?'Account & Password Recovery':t.submit)+'&body='+encodeURIComponent(t.fields.map((x,i)=>(i+1)+'. '+x+': ').join('\\n')+'\\n\\nEvidence proving account ownership:\\n');
+   const emailBody=lang==='en' ? 'Account & Password Recovery RGC\n\n\nHello, I hope to receive your support and help.\n\n\nRequest Reason :\n\n\nEvidence below :\n\n1. Account name / username:\n2. Email linked to the account (V1 client):\n3. When did you last log in?\n4. Which channel do you play on most?\n5. Do you have an active rank?\n6. Recently used passwords (do not send your current password):\n7. If a mobile number is linked, provide that mobile number.\n\n\nEvidence proving account ownership:\n\n\nthanks for your support in advance.' : t.fields.map((x,i)=>(i+1)+'. '+x+': ').join('\n')+'\n\nEvidence proving account ownership:\n';
+   root.querySelector('[data-rec-submit]').dataset.mailto='mailto:bikesh@rankedgaming.com?subject='+encodeURIComponent(lang==='en'?'Account & Password Recovery RGC':t.submit)+'&body='+encodeURIComponent(emailBody);
   }
   langSel.addEventListener('change',()=>applyRecoveryLang(langSel.value));
   root.querySelector('[data-rec-submit]').addEventListener('click',()=>{window.location.href=root.querySelector('[data-rec-submit]').dataset.mailto;});
